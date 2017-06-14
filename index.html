@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title></title>
+	</head>
+	<body>
+		<form action="" id="registerForm" method="post">
+			请输入用户名：<input id="name" type="text" id="inp" name="username" value=""/>
+			请输入密码：<input id="password" type="password" name="password" value=""/>
+			请输入手机号码：<input id="tel" type="text" name="username" value=""/>	
+			<button id="btn">提交</button>
+		</form>
+		<script>
+			//策略对象(检测)
+			var state = {
+				isNoEmpty : function(value,errorMsg){
+					if(value===''){
+						return errorMsg;
+						
+					}
+		
+				},
+				
+				minLength : function(value,length,errorMsg){
+					if(value.length<length){
+						return errorMsg
+					
+					}
+				},
+				
+				
+				isMobile : function(value,errorMsg){
+					
+					if(!/(^1[3|4|5|6|7|8|9][0-9]{9})/.test(value)){
+						return errorMsg
+				
+					}
+				},
+		
+			};
+			
+			//Validator
+			var Validator = function(){
+				this.cash = [];
+				
+			};
+			
+			//操作的dom对象以及使用的规则   //数组
+			Validator.prototype.add = function(dom,rules){
+				
+				var  self = this;
+			
+				for (var i=0; i<rules.length; i++) {
+				
+					
+					(function(rule){
+						
+						var stateAry = rule.stategy.split(':');
+						var errorMsg = rule.errorMsg;
+						self.cash.push(function(){
+							//将函数放在数组里面
+							var stategy = stateAry.shift();  //获取要验证的对象的key
+							stateAry.unshift(dom.value);
+							stateAry.push(errorMsg); 
+							return state[stategy].apply(dom,stateAry);
+						
+						});
+					
+					})(rules[i])//闭包
+					
+				}
+		
+			};
+			
+			Validator.prototype.start = function(){
+				for (var i=0; i<this.cash.length; i++) {
+					//遍历数组
+					
+					//调用每一个函数
+					var errorMsg = this.cash[i]();
+					if(errorMsg){
+						return errorMsg;
+				
+					}
+					
+					
+				}
+				
+				
+			};
+			
+			
+			//客户调用代码
+			var name = document.getElementById('name');
+			var password = document.getElementById('password');
+			var tel = document.getElementById('tel');
+			var aaFun = function(){
+				var valida = new Validator();
+				valida.add(name,[
+					{
+						stategy : 'isNoEmpty',
+						errorMsg : '用户名不能为空'
+						
+					},
+					
+					{
+						stategy : 'minLength:10',
+						errorMsg : '用户名长度不能小于10位'
+						
+					},
+			
+				]);
+				
+				valida.add(password,[
+				
+					{
+						stategy : 'minLength:6',
+						errorMsg : '密码长度不能小于10位'
+						
+					},
+			
+				]);
+				
+				valida.add(tel,[
+				
+					{
+						stategy : 'isMobile',
+						errorMsg : '手机号码格式不正确'
+						
+					},
+			
+				]);
+				
+				var errorMsg = valida.start();
+				
+				return errorMsg;
+				
+				
+			};
+			
+			console.log(document.getElementById('btn'));
+			
+			document.getElementById('btn').onclick = function(e){
+				e.preventDefault();
+				
+				var errorMsg = aaFun();
+				
+				if(errorMsg){
+					alert(errorMsg)
+					
+					return false;
+				}
+				
+				
+			}
+			
+//			document.getElementsByClassName('button')[0].onclick = function(){
+//				
+//				
+//				var errorMsg = aaFun();
+//				
+//				if(errorMsg){
+//					alert(errorMsg)
+//					
+//					return false;
+//				}
+//				
+//		
+//				
+//			};
+	
+		</script>
+		
+	</body>
+</html>
